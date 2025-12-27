@@ -1,6 +1,13 @@
 # 🐉 DracoStack - ChurnInsight API
 
 <p align="center">
+<<<<<<< HEAD
+=======
+  <img src="assets/logo.png" alt="DracoStack Logo" width="350"/>
+</p>
+
+<p align="center">
+>>>>>>> 4613890 (Carpeta equipo data)
   <strong>API REST desarrollada en Spring Boot para el análisis predictivo de churn (cancelación de clientes)</strong>
 </p>
 
@@ -268,4 +275,8 @@ Este proyecto es desarrollado en colaboración por:
 
 🐉 **DracoStack** - Prediciendo el futuro de tus clientes
 
+<<<<<<< HEAD
 *Proyecto ChurnInsight - Hackathon One 2025*
+=======
+*Proyecto ChurnInsight - Hackathon One 2025*
+>>>>>>> 4613890 (Carpeta equipo data)

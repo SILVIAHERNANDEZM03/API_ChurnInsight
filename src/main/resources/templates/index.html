@@ -42,25 +42,34 @@
 
                 <form id="churnForm">
 
-                    <label>Tiempo de Contrato (meses)</label>
-                    <input type="number" id="tiempoContratoMeses" placeholder="Ej: 12" required>
+                    <label>Edad</label>
+                    <input type="number" id="age" placeholder="Ej: 52" required>
 
-                    <label>Retrasos de Pago</label>
-                    <input type="number" id="retrasosPago" placeholder="Ej: 2" required>
+                    <label>Género</label>
+                    <select id="gender" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
 
-                    <label>Uso Mensual Promedio</label>
-                    <input type="number" step="0.1" id="usoMensual" placeholder="Ej: 14.5" required>
-
-                    <label>Tipo de Plan</label>
-                    <select id="plan" required>
-                        <option value="">Seleccionar plan...</option>
+                    <label>Tipo de Suscripción</label>
+                    <select id="subscription_type" required>
+                        <option value="">Seleccionar...</option>
                         <option value="Basic">Basic</option>
                         <option value="Standard">Standard</option>
                         <option value="Premium">Premium</option>
                     </select>
 
+                    <label>Horas de Visualización</label>
+                    <input type="number" step="0.1" id="watch_hours" placeholder="Ej: 1.1" required>
+
+                    <label>Días desde último login</label>
+                    <input type="number" id="last_login_days" placeholder="Ej: 30" required>
+
                     <button type="submit">ANALIZAR CLIENTE</button>
                 </form>
+
 
                 <div id="resultado" class="resultado hidden"></div>
             </div>
@@ -75,12 +84,14 @@ POST /predict
 Content-Type: application/json
 
 {
-  "tiempo_contrato_meses": 0,
-  "retrasos_pago": 0,
-  "uso_mensual": 0,
-  "plan": ""
+  "age": 0,
+  "gender": "",
+  "subscription_type": "",
+  "watch_hours": 0,
+  "last_login_days": 0
 }
-            </pre>
+</pre>
+
             </div>
         </div>
         </div>

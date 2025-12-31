@@ -1,51 +1,47 @@
 package com.churninsight.api.controller;
 
-
-import com.churninsight.api.dto.PredictionRequestDTO;
+import com.churninsight.api.dto.ChurnRequestDTO;
+import com.churninsight.api.dto.ClientProfileDTO;
 import com.churninsight.api.dto.PredictionResponseDTO;
-import com.churninsight.api.dto.StatsResponseDTO;
 import com.churninsight.api.service.PredictionService;
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/predict")
+@CrossOrigin(origins = "*")
 public class PredictionController {
 
-    private final PredictionService service;
+    private final PredictionService predictionService;
 
-    public PredictionController(PredictionService service) {
-        this.service = service;
+    public PredictionController(PredictionService predictionService) {
+        this.predictionService = predictionService;
     }
 
-    @GetMapping("/test")
-    public String test() {
-        return "API OK";
-    }
+    @PostMapping
+    public PredictionResponseDTO predict(
+            @RequestBody ChurnRequestDTO request) {
 
-
-    @PostMapping(
-            consumes = "application/json",
-            produces = "application/json"
-    )
-    public ResponseEntity<PredictionResponseDTO> predict(
-            @Valid @RequestBody PredictionRequestDTO request) {
-
-        return ResponseEntity.ok(service.predict(request));
+        return predictionService.predict(request);
     }
 
     @GetMapping("/client/{id}")
-    public ResponseEntity<PredictionResponseDTO> predictByClientId(
-            @PathVariable String id) {
+    public PredictionResponseDTO predictByClientId(@PathVariable String id) {
 
-        return ResponseEntity.ok(service.predictByClientId(id));
-    }
+        // MOCK de datos cargados desde "modelo"
+        ClientProfileDTO client = new ClientProfileDTO(
+                52,
+                "Other",
+                "Basic",
+                1.1,
+                30,
+                "Asia"
+        );
 
-    @GetMapping("/stats")
-    public ResponseEntity<StatsResponseDTO> getStats() {
-        return ResponseEntity.ok(service.getStats());
+        return new PredictionResponseDTO(
+                "Cancela",
+                0.78,
+                client
+        );
     }
 
 }

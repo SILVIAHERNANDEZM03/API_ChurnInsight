@@ -1,40 +1,36 @@
 package com.churninsight.api.service;
 
-
-import com.churninsight.api.dto.PredictionRequestDTO;
+import com.churninsight.api.dto.ChurnRequestDTO;
+import com.churninsight.api.dto.ClientProfileDTO;
 import com.churninsight.api.dto.PredictionResponseDTO;
-import com.churninsight.api.dto.StatsResponseDTO;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PredictionService {
 
+    public PredictionResponseDTO predict(ChurnRequestDTO req) {
 
-        public PredictionResponseDTO predict(PredictionRequestDTO request) {
+        double score = 0;
 
-            int retrasos = request.getRetrasosPago() != null ? request.getRetrasosPago() : 0;
-            int meses = request.getTiempoContratoMeses() != null ? request.getTiempoContratoMeses() : 0;
-            double uso = request.getUsoMensual() != null ? request.getUsoMensual() : 0;
+        if (req.getWatch_hours() < 2) score += 0.3;
+        if (req.getLast_login_days() > 20) score += 0.4;
+        if ("Basic".equals(req.getSubscription_type())) score += 0.2;
 
-            boolean altoRiesgo =
-                    retrasos > 2 ||
-                            meses < 6 ||
-                            uso < 10;
+        double prob = Math.min(score, 1.0);
 
-            if (altoRiesgo) {
-                return new PredictionResponseDTO("Va a cancelar", 0.75);
-            } else {
-                return new PredictionResponseDTO("Va a continuar", 0.15);
-            }
-        }
+        ClientProfileDTO client = new ClientProfileDTO(
+                req.getAge(),
+                req.getGender(),
+                req.getSubscription_type(),
+                req.getWatch_hours(),
+                req.getLast_login_days(),
+                "N/A"
+        );
 
-    public PredictionResponseDTO predictByClientId(String clientId) {
-        return new PredictionResponseDTO("Va a cancelar", 0.82);
-    }
-
-
-    public StatsResponseDTO getStats() {
-        return new StatsResponseDTO(500, 120, 0.24);
+        return new PredictionResponseDTO(
+                prob > 0.5 ? "Cancela" : "No cancela",
+                prob,
+                client
+        );
     }
 }
-

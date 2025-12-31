@@ -9,4 +9,7 @@ import lombok.Data;
 public class PredictionResponseDTO {
     private String prevision;
     private Double probabilidad;
+    private ClientProfileDTO client;
+
 }
+

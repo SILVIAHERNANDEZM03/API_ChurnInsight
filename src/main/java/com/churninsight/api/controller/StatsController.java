@@ -2,6 +2,7 @@ package com.churninsight.api.controller;
 
 import com.churninsight.api.dto.ChurnStatsDTO;
 import com.churninsight.api.service.StatsService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -9,14 +10,14 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 public class StatsController {
 
-    private final StatsService service;
+    private final StatsService statsService;
 
-    public StatsController(StatsService service) {
-        this.service = service;
+    public StatsController(StatsService statsService) {
+        this.statsService = statsService;
     }
 
-    @GetMapping("/charts")
-    public ChurnStatsDTO getCharts() {
-        return service.getMockStats();
+    @GetMapping("/stats")
+    public ResponseEntity<ChurnStatsDTO> getStats() {
+        return ResponseEntity.ok(statsService.getMockStats());
     }
 }

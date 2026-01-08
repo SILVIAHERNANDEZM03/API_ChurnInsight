@@ -1,12 +1,14 @@
 package com.churninsight.api.controller;
 
-import com.churninsight.api.dto.ChurnStatsDTO;
+import com.churninsight.api.dto.StatsResponseDTO;
 import com.churninsight.api.service.StatsService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/predict")
+@RequestMapping("/probability")
 @CrossOrigin(origins = "*")
 public class StatsController {
 
@@ -16,8 +18,23 @@ public class StatsController {
         this.statsService = statsService;
     }
 
-    @GetMapping("/stats")
-    public ResponseEntity<ChurnStatsDTO> getStats() {
-        return ResponseEntity.ok(statsService.getMockStats());
+    @GetMapping("gender")
+    public StatsResponseDTO genderStats() {
+        return statsService.getStats("gender");
+    }
+
+    @GetMapping("/region")
+    public StatsResponseDTO regionStats() {
+        return statsService.getStats("region");
+    }
+
+    @GetMapping("/subscription")
+    public StatsResponseDTO subscriptionStats() {
+        return statsService.getStats("subscription");
+    }
+
+    @GetMapping("/age")
+    public StatsResponseDTO ageStats() {
+        return statsService.getStats("age");
     }
 }

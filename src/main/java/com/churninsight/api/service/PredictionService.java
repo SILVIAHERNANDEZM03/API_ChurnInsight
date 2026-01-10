@@ -9,6 +9,11 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 
 @Service
 public class PredictionService {
@@ -35,25 +40,42 @@ public class PredictionService {
 
         String url = MODEL_ID_URL + publicId;
 
-        ResponseEntity<Map> response =
-                restTemplate.getForEntity(url, Map.class);
+        try {
+            ResponseEntity<Map> response =
+                    restTemplate.getForEntity(url, Map.class);
 
-        Map body = response.getBody();
+            Map body = response.getBody();
 
-        Map prediction = (Map) body.get("prediction");
-        Map probabilities = (Map) prediction.get("probabilities");
+            Map prediction = (Map) body.get("prediction");
+            Map probabilities = (Map) prediction.get("probabilities");
 
-        int pred = (int) prediction.get("prediction");
-        double churnProb =
-                ((Number) probabilities.get("churn")).doubleValue();
+            int pred = (int) prediction.get("prediction");
+            double churnProb =
+                    ((Number) probabilities.get("churn")).doubleValue();
 
-        Map client =
-                ((List<Map>) body.get("data")).get(0);
+            Map client =
+                    ((List<Map>) body.get("data")).get(0);
 
-        return new PredictionResponseDTO(
-                pred,
-                churnProb,
-                client
-        );
+            return new PredictionResponseDTO(
+                    pred,
+                    churnProb,
+                    client
+            );
+
+        } catch (HttpClientErrorException.NotFound ex) {
+            // Intentar extraer el campo 'detail' del body JSON del servicio externo
+            String detailMsg = ex.getResponseBodyAsString();
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode node = mapper.readTree(detailMsg);
+                if (node.has("detail")) {
+                    detailMsg = node.get("detail").asText();
+                }
+            } catch (Exception ignore) {
+                // fallback: usar el body tal cual
+            }
+
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, detailMsg);
+        }
     }
 }

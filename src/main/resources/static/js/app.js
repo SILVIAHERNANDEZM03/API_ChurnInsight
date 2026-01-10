@@ -47,13 +47,45 @@ async function buscarCliente() {
         return;
     }
 
+    const div = document.getElementById("resultadoBusqueda");
+
     try {
         const response = await fetch(
             `http://localhost:8080/predict/client/${id}`
         );
+
+        if (!response.ok) {
+            // Intentar leer el cuerpo como texto/JSON para obtener detalle
+            let message = `Error: ${response.status} ${response.statusText}`;
+            try {
+                const text = await response.text();
+                // si viene JSON con 'detail' mostrarlo
+                try {
+                    const json = JSON.parse(text);
+                    if (json.detail) {
+                        message = json.detail;
+                    } else if (json.message) {
+                        message = json.message;
+                    } else {
+                        message = text || message;
+                    }
+                } catch (e) {
+                    message = text || message;
+                }
+            } catch (e) {
+                // ignore
+            }
+
+            div.classList.remove("hidden");
+            div.innerHTML = `
+                <h3>Cliente ${id}</h3>
+                <p class="error">${message}</p>
+            `;
+            return;
+        }
+
         const result = await response.json();
 
-        const div = document.getElementById("resultadoBusqueda");
         div.classList.remove("hidden");
 
         div.innerHTML = `
@@ -74,7 +106,11 @@ async function buscarCliente() {
             <p><strong>Región:</strong> ${result.client.region}</p>
         `;
     } catch (error) {
-        alert("Error al buscar cliente");
+        div.classList.remove("hidden");
+        div.innerHTML = `
+            <h3>Cliente ${id}</h3>
+            <p class="error">Ocurrió un error al comunicarse con el servidor.</p>
+        `;
     }
 }
 

@@ -66,6 +66,7 @@ Interfaz web que permite la interacción del usuario con el sistema de predicci�
     <li>Búsqueda de clientes por ID</li>
     <li>Visualización de estadísticas</li>
     <li>Gráficas dinámicas</li>
+    <li>Exportar gráficas a PDF (1 gráfico por página, con logo y título)</li>
 </ul>
 
 <b>Tecnologías:</b>
@@ -74,6 +75,7 @@ Interfaz web que permite la interacción del usuario con el sistema de predicci�
     <li>CSS3</li>
     <li>JavaScript</li>
     <li>Chart.js</li>
+    <li>jsPDF (para exportar gráficos a PDF, cargado desde CDN en la plantilla)</li>
 </ul>
 
 <hr/>
@@ -178,6 +180,31 @@ Servicio principal que actúa como intermediario entre el frontend y el microser
 
 <hr/>
 
+<h2>🖨️ Exportar PDF de gráficas</h2>
+
+<p>Se agregó una funcionalidad en la sección <strong>Análisis Avanzado</strong> para exportar las gráficas a un documento PDF con las siguientes características:</p>
+
+<ul>
+  <li>Botón: «Exportar a PDF» en la esquina superior derecha de la sección de estadísticas.</li>
+  <li>Formato del archivo: <code>Analisis_Cartera_DracoStack_Churnsight_HHMMSS.pdf</code> (hora, minutos y segundos de generación añadidos al nombre).</li>
+  <li>Dentro del PDF:</li>
+    <ul>
+      <li>Título principal: <strong>"Análisis Carter Clientes"</strong> (centrado, color negro).</li>
+      <li>Logo del proyecto en la esquina superior izquierda (se usa <code>/img/logo.png</code>).</li>
+      <li>Cada página contiene 1 gráfico (uno por hoja).</li>
+      <li>El título de cada gráfico aparece en la parte superior de la página, en negrita y con tamaño ligeramente mayor (14pt).</li>
+    </ul>
+  <li>Implementación técnica: se utiliza <strong>jsPDF</strong> (UMD) para generar el PDF y los gráficos se obtienen desde los <code>&lt;canvas&gt;</code> de Chart.js.</li>
+</ul>
+
+<p>Consideraciones:</p>
+<ul>
+  <li>El logo y las imágenes deben estar disponibles en el mismo origen (mismo host) para evitar problemas de CORS al exportar desde canvas.</li>
+  <li>Si algún canvas está contaminado por recursos cross-origin sin CORS, la extracción con <code>toDataURL()</code> puede fallar.</li>
+</ul>
+
+<hr/>
+
 <h2>🐳 Ejecución con Docker</h2>
 
 <pre>
@@ -216,6 +243,16 @@ mvn spring-boot:run
 
 La API estará disponible en http://localhost:8080
 
+
+<h3>Exportar PDF - Uso Rápido</h3>
+
+<ol>
+  <li>Levanta la aplicación (ver pasos anteriores).</li>
+  <li>Abre <code>http://localhost:8080</code> en tu navegador.</li>
+  <li>En la pestaña <strong>Análisis Avanzado</strong> espera a que carguen las gráficas.</li>
+  <li>Haz clic en <strong>Exportar a PDF</strong>. Se descargará un archivo con el nombre del formato solicitado.</li>
+</ol>
+
 <hr/>
 
 <h2>⚠️ Dependencias Externas</h2>
@@ -224,6 +261,27 @@ La API estará disponible en http://localhost:8080
 Este proyecto depende de un microservicio externo de Machine Learning que debe estar activo para el
 funcionamiento correcto de las predicciones y estadísticas.
 </p>
+
+<hr/>
+
+<h2>📁 Archivos modificados (nuevas funcionalidades)</h2>
+
+<ul>
+  <li><code>src/main/resources/templates/index.html</code> — botón "Exportar a PDF" y carga de jsPDF (CDN).</li>
+  <li><code>src/main/resources/static/js/app.js</code> — función <code>exportChartsToPDF()</code> y helper <code>loadImage()</code>.</li>
+  <li><code>src/main/resources/static/css/styles.css</code> — estilos para el botón <code>.export-btn</code> y clase <code>.error</code>.</li>
+  <li>(Previo) <code>src/main/java/com/churninsight/api/service/PredictionService.java</code> — manejo de 404 del servicio externo y reenvío de detalle en la respuesta.</li>
+  <li>(Previo) <code>src/main/java/com/churninsight/api/exception/ApiExceptionHandler.java</code> — handler para propagar mensajes de error personalizados.</li>
+</ul>
+
+<hr/>
+
+<h2>⚠️ Notas técnicas y pruebas</h2>
+
+<ul>
+  <li>La generación del PDF usa la API <code>canvas.toDataURL()</code> para convertir cada gráfico a imagen y luego la inserta en el PDF. Si la imagen del canvas viene de recursos cross-origin sin CORS esto puede fallar.</li>
+  <li>Se probó la compilación y arranque del proyecto con el wrapper Maven incluido (comando <code>.\\\mvnw.cmd -q test</code> en Windows) para verificar que los cambios no introdujeron errores de build.</li>
+</ul>
 
 <hr/>
 

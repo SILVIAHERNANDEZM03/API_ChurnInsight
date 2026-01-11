@@ -47,45 +47,13 @@ async function buscarCliente() {
         return;
     }
 
-    const div = document.getElementById("resultadoBusqueda");
-
     try {
         const response = await fetch(
             `http://localhost:8080/predict/client/${id}`
         );
-
-        if (!response.ok) {
-            // Intentar leer el cuerpo como texto/JSON para obtener detalle
-            let message = `Error: ${response.status} ${response.statusText}`;
-            try {
-                const text = await response.text();
-                // si viene JSON con 'detail' mostrarlo
-                try {
-                    const json = JSON.parse(text);
-                    if (json.detail) {
-                        message = json.detail;
-                    } else if (json.message) {
-                        message = json.message;
-                    } else {
-                        message = text || message;
-                    }
-                } catch (e) {
-                    message = text || message;
-                }
-            } catch (e) {
-                // ignore
-            }
-
-            div.classList.remove("hidden");
-            div.innerHTML = `
-                <h3>Cliente ${id}</h3>
-                <p class="error">${message}</p>
-            `;
-            return;
-        }
-
         const result = await response.json();
 
+        const div = document.getElementById("resultadoBusqueda");
         div.classList.remove("hidden");
 
         div.innerHTML = `
@@ -106,11 +74,7 @@ async function buscarCliente() {
             <p><strong>Región:</strong> ${result.client.region}</p>
         `;
     } catch (error) {
-        div.classList.remove("hidden");
-        div.innerHTML = `
-            <h3>Cliente ${id}</h3>
-            <p class="error">Ocurrió un error al comunicarse con el servidor.</p>
-        `;
+        alert("Error al buscar cliente");
     }
 }
 
@@ -254,108 +218,4 @@ function dibujarGrafica(
     }
 
     charts[id] = new Chart(ctx, config);
-}
-
-// Exportar gráficos a PDF: 1 gráfico por hoja, título y logo
-async function exportChartsToPDF() {
-    // Asegurarse que los charts existan
-    const canvasIds = ["chartRiesgo", "chartSubscription", "chartRegion", "chartAge"];
-
-    // Acceder a jsPDF UMD (window.jspdf)
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-
-    // Cargar logo como Image
-    const logoUrl = '/img/logo.png';
-    const logoImg = await loadImage(logoUrl).catch(() => null);
-
-    const now = new Date();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
-    const ss = String(now.getSeconds()).padStart(2, '0');
-    const filename = `Analisis_Cartera_DracoStack_Churnsight_${hh}${mm}${ss}.pdf`;
-
-    for (let i = 0; i < canvasIds.length; i++) {
-        const id = canvasIds[i];
-        const canvas = document.getElementById(id);
-        if (!canvas) continue;
-
-        // Convertir canvas a dataURL PNG
-        const dataUrl = canvas.toDataURL('image/png', 1.0);
-
-        if (i > 0) doc.addPage();
-
-        // Añadir logo en esquina superior izquierda (10pt desde bordes)
-        const margin = 40; // margen en puntos
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-        // logo tamaño en pt
-        const logoW = 60;
-        const logoH = 60;
-        if (logoImg) {
-            doc.addImage(logoImg, 'PNG', margin, margin - 10, logoW, logoH);
-        }
-
-        // Título principal: "Análisis Carter Clientes" centrado, color negro
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(18);
-        doc.setTextColor(0, 0, 0);
-        const mainTitle = 'Análisis Carter Clientes';
-        const mainTitleWidth = doc.getTextWidth(mainTitle);
-        doc.text(mainTitle, (pageWidth - mainTitleWidth) / 2, margin + 15);
-
-        // Título del gráfico: en la parte superior, en negrita y un poco más grande
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(14);
-        const chartTitles = {
-            'chartRiesgo': 'Churn por Género',
-            'chartSubscription': 'Churn por Suscripción',
-            'chartRegion': 'Churn por Región',
-            'chartAge': 'Churn por Edad'
-        };
-        const chartTitle = chartTitles[id] || '';
-        const chartTitleWidth = doc.getTextWidth(chartTitle);
-        const chartTitleY = margin + 45; // justo debajo del título principal
-        doc.text(chartTitle, (pageWidth - chartTitleWidth) / 2, chartTitleY);
-
-        // Insertar la imagen del gráfico centrada
-        // Calcular área disponible (restando top area y márgenes)
-        const topOffset = chartTitleY + 10; // dejar algo de espacio entre título y gráfico
-        const availableWidth = pageWidth - margin * 2;
-        const availableHeight = pageHeight - topOffset - margin;
-
-        // Crear imagen con tamaño proporcional
-        // Primero se crea un objeto Image para obtener dimensiones
-        const img = await loadImage(dataUrl).catch(() => null);
-        if (img) {
-            let imgW = img.width;
-            let imgH = img.height;
-            const ratio = Math.min(availableWidth / imgW, availableHeight / imgH);
-            imgW = imgW * ratio;
-            imgH = imgH * ratio;
-
-            const x = (pageWidth - imgW) / 2;
-            const y = topOffset;
-
-            doc.addImage(dataUrl, 'PNG', x, y, imgW, imgH);
-
-            // (antes el título del gráfico estaba debajo; ahora lo colocamos arriba)
-            // Restaurar fuente normal para el resto
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(12);
-        }
-    }
-
-    doc.save(filename);
-}
-
-// Helper: cargar imagen y devolver data compatible para jsPDF (Image o dataURL)
-function loadImage(src) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = src;
-    });
 }

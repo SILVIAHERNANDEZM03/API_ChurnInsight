@@ -8,6 +8,8 @@ public class ModelDataDTO {
     private String gender;
     private String subscription_type;
     private Double watch_hours;
-    private Integer last_login_days;
     private String region;
+    private Integer number_of_profiles;
+    private String payment_method;
+    private String device;
 }

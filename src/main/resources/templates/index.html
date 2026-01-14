@@ -66,9 +66,6 @@
                         <label for="watch_hours">Horas de Visualización</label>
                         <input type="number" step="0.1" id="watch_hours" placeholder="Ej: 1.1" required>
 
-                        <label for="last_login_days">Días desde último login</label>
-                        <input type="number" id="last_login_days" placeholder="Ej: 30" required>
-
                         <label for="region">Región</label>
                         <select id="region" required>
                             <option value="" disabled selected>Seleccionar...</option>
@@ -78,6 +75,29 @@
                             <option value="Oceania">Oceanía</option>
                             <option value="SouthAmerica">Sudamérica</option>
                             <option value="NorthAmerica">América del Norte</option>
+                        </select>
+
+                        <label for="number_of_profiles">Número de perfiles</label>
+                        <input type="number" id="number_of_profiles" placeholder="Ej: 3" required>
+
+                        <label for="payment_method">Metódo de pago</label>
+                        <select id="payment_method" required>
+                            <option value="" disabled selected>Seleccionar...</option>
+                            <option value="debit card">Tarjeta de débito</option>
+                            <option value="payPal">Paypal</option>
+                            <option value="crypto">Criptomonedas</option>
+                            <option value="gift card">Tarjeta de regalo</option>
+                            <option value="credit card">Tarjeta de crédito</option>
+                        </select>
+
+                        <label for="device">Dispositivo</label>
+                        <select id="device" required>
+                            <option value="" disabled selected>Seleccionar...</option>
+                            <option value="tablet">Tablet</option>
+                            <option value="laptop">Laptop</option>
+                            <option value="mobile">Celular</option>
+                            <option value="tv">Televisión</option>
+                            <option value="desktop">Computador de escritorio</option>
                         </select>
 
                         <button type="submit">ANALIZAR CLIENTE</button>
@@ -98,8 +118,10 @@ Content-Type: application/json
   "gender": "",
   "subscription_type": "",
   "watch_hours": 0,
-  "last_login_days": 0,
-  "region": ""
+  "region": "",
+  "number_of_profiles": 0,
+  "payment_method": "",
+  "device": "",                      
 }
                         </pre>
                 </div>

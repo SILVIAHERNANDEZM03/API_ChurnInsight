@@ -102,8 +102,10 @@ async function buscarCliente() {
             <p><strong>Género:</strong> ${result.client.gender}</p>
             <p><strong>Suscripción:</strong> ${result.client.subscription_type}</p>
             <p><strong>Horas de Visualización:</strong> ${result.client.watch_hours}</p>
-            <p><strong>Días desde último Login:</strong> ${result.client.last_login_days}</p>
+            <p><strong>Número de perfiles:</strong> ${result.client.number_of_profiles}</p>
             <p><strong>Región:</strong> ${result.client.region}</p>
+            <p><strong>Metódo de pago:</strong> ${result.client.payment_method}</p>
+            <p><strong>Dispositivo:</strong> ${result.client.device}</p>
         `;
     } catch (error) {
         div.classList.remove("hidden");
@@ -126,10 +128,11 @@ document
             gender: document.getElementById("gender").value,
             subscription_type: document.getElementById("subscription_type").value,
             watch_hours: parseFloat(document.getElementById("watch_hours").value),
-            last_login_days: parseInt(
-                document.getElementById("last_login_days").value
-            ),
-            region: document.getElementById("region").value
+            number_of_profiles: parseInt(
+                document.getElementById("number_of_profiles").value),
+            region: document.getElementById("region").value,
+            payment_method: document.getElementById("payment_method").value,
+            device: document.getElementById("device").value
         };
 
         // Preview API
@@ -187,9 +190,10 @@ async function cargarGraficas() {
         dibujarGrafica(edad.data, "chartAge", "line", "Edad");
 
     } catch (error) {
-        console.error(error);
+        console.error("Error cargando gráficas:", error);
     }
 }
+
 
 
 /* FUNCIÓN GRÁFICA */
@@ -204,7 +208,10 @@ function dibujarGrafica(
         charts[id].destroy();
     }
 
-    const ctx = document.getElementById(id).getContext("2d");
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
 
     const config = {
         type: tipo,
@@ -213,13 +220,7 @@ function dibujarGrafica(
             datasets: [
                 {
                     label: "Churn %",
-                    data: datos.map(d =>
-                        tipo === "doughnut"
-                            ? d.churnProbability
-                            : horizontal
-                                ? d.churnProbability * 100
-                                : d.churnProbability
-                    ),
+                    data: datos.map(d => d.churnProbability),
                     backgroundColor:
                         tipo === "doughnut"
                             ? ["#1e3799", "#4a69bd", "#60a3bc"]
@@ -231,6 +232,15 @@ function dibujarGrafica(
             indexAxis: horizontal ? "y" : "x",
             responsive: true,
             maintainAspectRatio: false,
+            scales: tipo !== "doughnut" ? {
+                y: {
+                    min: 0,
+                    max: 100,
+                    ticks: {
+                        callback: value => value + "%"
+                    }
+                }
+            } : {},
             plugins: {
                 title: {
                     display: true,
@@ -244,17 +254,14 @@ function dibujarGrafica(
     if (tipo !== "doughnut") {
         config.data.datasets.push({
             label: "No Churn %",
-            data: datos.map(d =>
-                horizontal
-                    ? d.notChurnProbability * 100
-                    : d.notChurnProbability
-            ),
+            data: datos.map(d => d.notChurnProbability),
             backgroundColor: "#36a2eb"
         });
     }
 
     charts[id] = new Chart(ctx, config);
 }
+
 
 // Exportar gráficos a PDF: 1 gráfico por hoja, título y logo
 async function exportChartsToPDF() {

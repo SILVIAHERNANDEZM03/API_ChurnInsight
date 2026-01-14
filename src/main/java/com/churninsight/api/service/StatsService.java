@@ -5,6 +5,7 @@ import com.churninsight.api.dto.StatsResponseDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,43 +13,55 @@ import java.util.Map;
 public class StatsService {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private static final String BASE_URL = "http://168.197.48.239:8000";
+    private static final String BASE_URL =
+            "https://definitely-poetry-few-bachelor.trycloudflare.com";
 
     public StatsResponseDTO getStats(String type) {
 
         String url = BASE_URL + "/probability/" + type;
-        Map<String, Object> response = restTemplate.getForObject(url, Map.class);
 
-        StatsResponseDTO dto = new StatsResponseDTO();
-        dto.setTotalUsers((int) response.get("total_users"));
+        try {
+            Map<String, Object> response =
+                    restTemplate.getForObject(url, Map.class);
 
-        String key = "grouped_by_" + type;
-        if (key.contains("subscription"))  key +="_type";
+            if (response == null) {
+                return new StatsResponseDTO();
+            }
 
-        List<Map<String, Object>> rawList =
-                (List<Map<String, Object>>) response.get(key);
+            StatsResponseDTO dto = new StatsResponseDTO();
 
-        List<StatsItemDTO> items = rawList.stream().map(item -> {
-            StatsItemDTO stat = new StatsItemDTO();
+            List<Map<String, Object>> rawList =
+                    (List<Map<String, Object>>) response.get("data");
 
-            stat.setLabel(
-                    item.get(type.equals("subscription") ? "subscription_type" : type).toString()
-            );
+            if (rawList == null) {
+                return dto;
+            }
 
-            stat.setChurnProbability(
-                    ((Number) item.get("churn_probability")).doubleValue()
-            );
-            stat.setNotChurnProbability(
-                    ((Number) item.get("not_churn_probability")).doubleValue()
-            );
-            stat.setUsersCount(
-                    ((Number) item.get("users_count")).intValue()
-            );
+            List<StatsItemDTO> items = new ArrayList<>();
 
-            return stat;
-        }).toList();
+            for (Map<String, Object> item : rawList) {
 
-        dto.setData(items);
-        return dto;
+                StatsItemDTO stat = new StatsItemDTO();
+
+                stat.setLabel(item.get("label").toString());
+                stat.setChurnProbability(
+                        ((Number) item.get("churnProbability")).doubleValue()
+                );
+                stat.setNotChurnProbability(
+                        ((Number) item.get("notChurnProbability")).doubleValue()
+                );
+                stat.setUsersCount(
+                        ((Number) item.get("usersCount")).intValue()
+                );
+
+                items.add(stat);
+            }
+
+            dto.setData(items);
+            return dto;
+
+        } catch (Exception e) {
+            return new StatsResponseDTO();
+        }
     }
 }

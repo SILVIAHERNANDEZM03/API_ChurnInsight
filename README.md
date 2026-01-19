@@ -7,173 +7,325 @@
 </div>
 
 <h1 align="center">📊 Churn Insight</h1>
-
-<h3 align="center">Plataforma de Análisis y Predicción de Cancelación de Clientes</h3>
-
-<hr/>
-
-<h2>🧠 Descripción del Proyecto</h2>
-
-<p>
-<b>Churn Insight</b> es una plataforma web diseñada para analizar y predecir la cancelación de clientes 
-(<i>customer churn</i>) mediante modelos de Machine Learning.
-</p>
-
-<p>
-El sistema permite a los usuarios realizar predicciones individuales, consultar clientes por ID
-y visualizar estadísticas agregadas mediante gráficas interactivas que consumen datos en tiempo real de un modelo de IA.
-</p>
-
-<p>
-El proyecto está construido bajo una arquitectura de microservicios, donde este repositorio contiene:
-</p>
-
-<ul>
-    <li>Frontend Web Responsivo (Optimizado para visualización de métricas).</li>
-    <li>Backend desarrollado en Spring Boot (API Gateway e Intérprete de Datos).</li>
-</ul>
-
-<p>
-El modelo de Machine Learning es consumido desde un microservicio externo desarrollado en FastAPI, expuesto de forma segura mediante túneles de Cloudflare.
-</p>
+<h3 align="center">Plataforma Web de Análisis y Predicción de Cancelación (Customer Churn)</h3>
 
 <hr/>
 
-<h2>🏗️ Arquitectura del Sistema</h2>
+## 🧠 Descripción
 
-<pre>
-[ Frontend Web (HTML + CSS + JavaScript + Chart.js) ]
-                    ↓ (Solicita JSON Normalizado)
-[ Backend Spring Boot (API Gateway / StatsService) ]
-                    ↓ (Consumo de Endpoints en Cloudflare)
-[ Microservicio ML Externo (FastAPI / IA Model) ]
-</pre>
+**Churn Insight** es una plataforma web que permite:
 
-<hr/>
+- **Predicción manual** del riesgo de churn (formulario).
+- **Búsqueda por ID (publicId)** para consultar un cliente existente y su probabilidad de churn.
+- **Dashboard (Análisis Avanzado)** con gráficas interactivas basadas en estadísticas del modelo.
+- **Exportación a PDF** (1 gráfico por página con logo y títulos).
 
-<h2>🧩 Componentes del Proyecto</h2>
+Este repositorio incluye **Frontend (HTML/CSS/JS)** + **Backend Spring Boot** que funciona como **API Gateway** hacia un microservicio externo de Machine Learning (FastAPI).
 
-<h3>🔹 Frontend</h3>
-<p>Interfaz web moderna que permite la interacción del usuario con el motor de predicción.</p>
+---
 
-<b>Funcionalidades:</b>
-<ul>
-    <li><b>Cálculo manual:</b> Formulario dinámico para predecir casos específicos.</li>
-    <li><b>Búsqueda por ID:</b> Consulta rápida de perfiles de clientes y su riesgo de fuga.</li>
-    <li><b>Análisis Avanzado:</b> Dashboard de estadísticas predictivas con 4 tipos de visualizaciones.</li>
-    <li><b>Exportación:</b> Generación de reportes PDF detallados (1 gráfico por página).</li>
-</ul>
+## 📌 Tabla de Contenido
 
-<b>Tecnologías:</b>
-<ul>
-    <li>HTML5 / CSS3 (Diseño Grid para gráficas).</li>
-    <li>JavaScript (ES6+).</li>
-    <li>Chart.js (Visualización de datos).</li>
-    <li>jsPDF (Motor de exportación).</li>
-</ul>
+- [Arquitectura](#-arquitectura)
+- [Tecnologías](#-tecnologías)
+- [Requisitos](#-requisitos)
+- [Ejecución local](#-ejecución-local)
+- [Ejecución con Docker](#-ejecución-con-docker)
+- [Configuración del microservicio ML](#-configuración-del-microservicio-ml)
+- [Swagger / OpenAPI](#-swagger--openapi)
+- [API Endpoints](#-api-endpoints)
+- [Frontend](#-frontend)
+- [Exportación PDF](#-exportación-pdf)
+- [Errores y troubleshooting](#-errores-y-troubleshooting)
+- [Backlog / Mejoras sugeridas](#-backlog--mejoras-sugeridas)
+- [Equipo](#-equipo)
 
-<hr/>
+---
 
-<h3>🔹 Backend (Spring Boot)</h3>
-<p>Actúa como el núcleo lógico que procesa, limpia y estandariza los datos provenientes del modelo de IA.</p>
+## 🏗️ Arquitectura
 
-<b>Responsabilidades:</b>
-<ul>
-    <li><b>Orquestación:</b> Gestión de peticiones hacia el microservicio externo.</li>
-    <li><b>Normalización (StatsService):</b> Responsable del mapeo y estandarización del JSON recibido. Nota: hay mejoras pendientes para manejar formatos inconsistentes y tipos inesperados de forma robusta.</li>
-    <li><b>Robustez:</b> Manejo de excepciones para evitar fallos en la UI si el servicio de ML presenta inconsistencias; se recomienda ampliar las validaciones a nivel de servicio para casos límite.</li>
-</ul>
+```
+[ Frontend Web (Thymeleaf + static: HTML/CSS/JS + Chart.js + jsPDF) ]
+                         ↓
+[ Backend Spring Boot (API Gateway / Normalización / Manejo de errores) ]
+                         ↓
+[ Microservicio ML Externo (FastAPI) ]
+    - Predicción manual
+    - Predicción por ID
+    - Endpoints de probability (stats)
+```
 
-<b>Tecnologías:</b>
-<ul>
-    <li>Java 17 / Spring Boot 3.5.8.</li>
-    <li>RestTemplate (Comunicación HTTP) — actualmente usado por los servicios que integran el modelo ML.</li>
-    <li>Lombok (Simplificación de código).</li>
-    <li>Maven (Gestión de dependencias).</li>
-</ul>
+> Nota importante: en este momento las URLs del microservicio externo están **hardcodeadas** en el código Java (ver sección de configuración).
 
-<hr/>
+---
 
-<h2>🔌 Endpoints del Backend</h2>
+## 🧰 Tecnologías
 
-<h3>📍 Predicción Individual</h3>
-<ul>
-    <li><b>POST /predict</b> – Procesa datos de formulario para predicción manual.</li>
-    <li><b>GET /predict/client/{publicId}</b> – Obtiene el perfil y riesgo de un cliente existente (el identificador usado en la API se denomina `publicId`).</li>
-</ul>
+**Backend**
+- Java 17
+- Spring Boot 3.5.8
+- Spring Web / Thymeleaf
+- Lombok
+- Springdoc OpenAPI (Swagger UI)
+- RestTemplate (llamadas HTTP al microservicio ML)
 
-<h3>📈 Análisis Estadístico (IA)</h3>
-<ul>
-    <li><b>GET /probability/gender</b> – Análisis de riesgo por género.</li>
-    <li><b>GET /probability/region</b> – Distribución geográfica del Churn.</li>
-    <li><b>GET /probability/subscription</b> – Impacto del nivel de suscripción.</li>
-    <li><b>GET /probability/age</b> – Tendencias predictivas por edad.</li>
-</ul>
+**Frontend**
+- HTML / CSS / JavaScript
+- Chart.js (gráficas)
+- jsPDF (exportación a PDF)
 
-<hr/>
+---
 
-<h2>📊 Visualizaciones Integradas</h2>
+## ✅ Requisitos
 
-<table border="1" cellpadding="8">
-    <tr>
-        <th>Análisis</th>
-        <th>Tipo de Gráfica</th>
-        <th>Origen del Dato</th>
-    </tr>
-    <tr>
-        <td>Género</td>
-        <td>Barras Verticales</td>
-        <td>ML Model (Gender Endpoint)</td>
-    </tr>
-    <tr>
-        <td>Región</td>
-        <td>Barras Horizontales</td>
-        <td>ML Model (Region Endpoint)</td>
-    </tr>
-    <tr>
-        <td>Suscripción</td>
-        <td>Doughnut Chart</td>
-        <td>ML Model (Sub Endpoint)</td>
-    </tr>
-    <tr>
-        <td>Edad</td>
-        <td>Line Chart</td>
-        <td>ML Model (Age Endpoint)</td>
-    </tr>
-</table>
+- **Java 17**
+- (Opcional) **Maven** — el proyecto incluye **Maven Wrapper** (`mvnw`, `mvnw.cmd`)
+- Acceso al **microservicio ML externo** (si no está accesible, la API de predicción/stats fallará)
 
-<hr/>
+---
 
-<h2>🖨️ Funcionalidad de Exportación PDF</h2>
+## ▶️ Ejecución local
 
-<p>Se implementó un motor de exportación en la sección <strong>Análisis Avanzado</strong>:</p>
-<ul>
-  <li><b>Formato:</b> Cada gráfico se exporta en alta resolución ocupando una página completa.</li>
-  <li><b>Identidad:</b> Incluye logo de DracoStack y títulos en negro sólido para máxima legibilidad.</li>
-  <li><b>Timestamp:</b> Los archivos se nombran con la marca de tiempo exacta (HHMMSS) para control de versiones.</li>
-</ul>
+### Linux / macOS
+```bash
+./mvnw spring-boot:run
+```
 
-<hr/>
+### Windows (PowerShell / CMD)
+```bat
+mvnw.cmd spring-boot:run
+```
 
-<h2>🆕 Últimas Actualizaciones</h2>
+Una vez arriba:
+- **Frontend**: `http://localhost:8080/`
+- **API base**: `http://localhost:8080/`
+- **Swagger UI**: `http://localhost:8080/swagger-ui/index.html`
 
-<ul>
-    <li><b>Pendiente - Fix de StatsService:</b> Implementación de mapeo seguro para campos <code>label</code> y <code>churnProbability</code> (pendiente de aplicación en el código). Se recomienda agregar pruebas unitarias que cubran formatos y tipos inconsistentes del modelo.</li>
-    <li><b>Pendiente - Resiliencia de API:</b> Detección automática de formato (lista vs objeto) en la respuesta del modelo — característica planificada y en evolución.</li>
-    <li><b>Diseño Responsivo:</b> Ajuste de contenedores CSS para evitar el desbordamiento de los canvas de Chart.js.</li>
-    <li><b>Manejo de Errores:</b> Captura de errores 404 y 500 del microservicio ML con retroalimentación clara en el frontend.</li>
-</ul>
+---
 
-<hr/>
+## 🐳 Ejecución con Docker
+
+> El `Dockerfile` asume que el JAR ya existe en `target/`. Primero hay que compilar.
+
+1) Construir el JAR
+```bash
+./mvnw clean package
+```
+
+2) Build de la imagen
+```bash
+docker build -t churninsight-api .
+```
+
+3) Run del contenedor
+```bash
+docker run --rm -p 8080:8080 churninsight-api
+```
+
+---
+
+## 🔧 Configuración del microservicio ML
+
+Actualmente hay **3 endpoints externos** definidos directamente en el código:
+
+### 1) Predicción manual (FastAPI)
+Archivo: `src/main/java/com/churninsight/api/service/PredictionService.java`
+```java
+private static final String MODEL_PREDICT_URL = "http://168.197.48.239:8000/predict";
+```
+
+### 2) Predicción por ID (FastAPI)
+Archivo: `src/main/java/com/churninsight/api/service/PredictionService.java`
+```java
+private static final String MODEL_ID_URL = "http://168.197.48.239:8000/item/predictions/";
+```
+
+### 3) Estadísticas probability (Cloudflare tunnel)
+Archivo: `src/main/java/com/churninsight/api/service/StatsService.java`
+```java
+private static final String BASE_URL = "https://definitely-poetry-few-bachelor.trycloudflare.com";
+```
+
+📌 **Si cambian URLs/túneles**, se deben actualizar estas constantes.
+
+> Recomendación (mejora futura): mover estas URLs a `application.properties` y/o variables de entorno para no recompilar.
+
+---
+
+## 📘 Swagger / OpenAPI
+
+El proyecto incluye Swagger UI vía `springdoc-openapi-starter-webmvc-ui`.
+
+- Swagger UI:  
+  `http://localhost:8080/swagger-ui/index.html`
+
+- OpenAPI JSON:  
+  `http://localhost:8080/v3/api-docs`
+
+---
+
+## 🔌 API Endpoints
+
+### 1) Predicción manual
+**POST** `/predict`
+
+**Request (JSON)**  
+> Importante: los campos están en **snake_case** (ej. `subscription_type`, `watch_hours`).
+
+```json
+{
+  "age": 52,
+  "gender": "Male",
+  "subscription_type": "Premium",
+  "watch_hours": 1.1,
+  "region": "Europe",
+  "number_of_profiles": 3,
+  "payment_method": "credit card",
+  "device": "tv"
+}
+```
+
+**Response (ejemplo)**
+```json
+{
+  "prediction": 1,
+  "probabilities": {
+    "churn": 0.83,
+    "not_churn": 0.17
+  }
+}
+```
+
+---
+
+### 2) Predicción por ID (publicId)
+**GET** `/predict/client/{publicId}`
+
+**Response (ejemplo)**
+```json
+{
+  "prediction": 1,
+  "probability": 0.83,
+  "client": {
+    "age": 52,
+    "gender": "Male",
+    "subscription_type": "Premium",
+    "watch_hours": 1.1,
+    "region": "Europe",
+    "number_of_profiles": 3,
+    "payment_method": "credit card",
+    "device": "tv"
+  }
+}
+```
+
+✅ **Errores 404 con detalle**
+Si el microservicio externo devuelve `{"detail":"..."}`, el backend lo normaliza y responde con:
+```json
+{
+  "detail": "mensaje",
+  "message": "mensaje"
+}
+```
+
+---
+
+### 3) Estadísticas (Análisis Avanzado)
+**GET** `/probability/gender`  
+**GET** `/probability/region`  
+**GET** `/probability/subscription`  
+**GET** `/probability/age`
+
+**Response esperada (ejemplo)**
+```json
+{
+  "totalUsers": 0,
+  "data": [
+    {
+      "label": "Male",
+      "churnProbability": 34.2,
+      "notChurnProbability": 65.8,
+      "usersCount": 120
+    }
+  ]
+}
+```
+
+📌 Nota: `StatsService` actualmente devuelve un `StatsResponseDTO` vacío si ocurre cualquier error al consumir el servicio externo (comportamiento “silencioso”).
+
+---
+
+## 🖥️ Frontend
+
+El frontend se sirve desde:
+- `GET /` → renderiza `templates/index.html`
+
+Secciones (tabs):
+- **Cálculo Manual**: formulario → `POST /predict`
+- **Búsqueda**: por publicId → `GET /predict/client/{id}`
+- **Análisis Avanzado**: stats + charts → `GET /probability/*`
+
+⚠️ Importante para despliegue:
+En `static/js/app.js` las llamadas `fetch()` están en **URL absoluta**:
+- `http://localhost:8080/...`
+
+Si se despliega en otro host/dominio, se recomienda cambiar a rutas relativas:
+- `/predict`
+- `/probability/gender`
+- etc.
+
+---
+
+## 🖨️ Exportación PDF
+
+En **Análisis Avanzado** existe el botón **Exportar a PDF**:
+- Exporta **1 gráfico por página**
+- Incluye logo (`/img/logo.png`) y títulos
+- Nombra el PDF con timestamp (HHMMSS)
+
+---
+
+## 🧯 Errores y troubleshooting
+
+### 1) “No carga /predict o /probability”
+- Verifica que el backend esté arriba en `http://localhost:8080/`
+- Verifica conectividad con el microservicio externo:
+  - `MODEL_PREDICT_URL` / `MODEL_ID_URL`
+  - `BASE_URL` (Cloudflare)
+
+### 2) 404 al buscar cliente por ID
+- El backend responde con `detail` y `message` si el servicio externo devuelve error.
+
+### 3) Dashboard vacío
+- `StatsService` devuelve respuesta vacía si hay error en la respuesta o formato inesperado del JSON (por ejemplo, si `data` no es lista o faltan campos).
+
+---
+
+## 🧩 Backlog / Mejoras sugeridas
+
+1) **Parametrizar URLs externas** (properties/env) en vez de hardcode.
+2) Cambiar `fetch("http://localhost:8080/...")` a rutas relativas para despliegue.
+3) Robustecer `StatsService`:
+   - Validar `nulls`
+   - Manejar tipos inesperados sin silenciar errores (log + respuesta informativa)
+4) Añadir **validaciones Bean Validation** a `ModelDataDTO` (`@NotNull`, rangos, etc.) y tests.
+5) Unificar consistencia de valores del formulario vs valores del modelo (case sensitive).
+6) Mejorar observabilidad: logs controlados y trazabilidad de fallos del servicio externo.
+
+---
 
 ## 👥 Equipo DracoStack
 
-- **Hernán Cerda** - Backend & Integración.
-- **Silvia Hernández** - Backend & Arquitectura.
-- **Aldo Sánchez** - Backend & ML Connection.
+- **Hernán Cerda** - Backend Developer
+- **Silvia Hernández** - Backend Developer
+- **Aldo Sánchez** - Backend Developer
+- **Kenny Solórzano** - Backend Developer
+- **Leslie Rodriguez** - Data Engineer
+- **Rocio Davila** - Data Scientist
+- **Elizabeth Garces** - Data Scientist
 
 <hr/>
 
 <div align="center">
-  <p><i>Este proyecto es una muestra de integración robusta entre Spring Boot y Machine Learning.</i></p>
+  <p><i>Churn Insight — Integración práctica entre Spring Boot y Machine Learning.</i></p>
 </div>

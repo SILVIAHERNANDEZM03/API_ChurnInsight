@@ -33,22 +33,22 @@ Desde una perspectiva de negocio, el costo de **no detectar un churner (False Ne
 ## 📁 Estructura del directorio
 
 data-science/
-├── data/
-│   ├── data_original.csv        # Dataset original (sin modificaciones)
-│   └── data_limpia.csv          # Dataset limpio y transformado (post-ETL)
-│
-├── notebooks/
-│   └── ChurnInsight_ETL-ML.ipynb # ETL + EDA + Entrenamiento y evaluación de modelos
-│
-├── models/
-│   ├── logreg_baseline.joblib   # Regresión Logística (baseline)
-│   ├── logreg_optimized.joblib  # Regresión Logística optimizada (modelo final)
-│   ├── tree_baseline.joblib     # Árbol de Decisión (baseline)
-│   ├── tree_optimized.joblib    # Árbol de Decisión optimizado
-│   ├── rf_baseline.joblib       # Random Forest (baseline)
-│   └── rf_optimized.joblib      # Random Forest optimizado
-│
-└── README.md                    # Documentación del componente de Data Science
+- ├── data/
+- │   ├── data_original.csv        # Dataset original (sin modificaciones)
+- │   └── data_limpia.csv          # Dataset limpio y transformado (post-ETL)
+- │
+- ├── notebooks/
+- │   └── ChurnInsight_ETL-ML.ipynb # ETL + EDA + Entrenamiento y evaluación de modelos
+- │
+- ├── models/
+- │   ├── logreg_baseline.joblib   # Regresión Logística (baseline)
+- │   ├── logreg_optimized.joblib  # Regresión Logística optimizada (modelo final)
+- │   ├── tree_baseline.joblib     # Árbol de Decisión (baseline)
+- │   ├── tree_optimized.joblib    # Árbol de Decisión optimizado
+- │   ├── rf_baseline.joblib       # Random Forest (baseline)
+- │   └── rf_optimized.joblib      # Random Forest optimizado
+- │
+- └── README.md                    # Documentación del componente de Data Science
 
 
 ## 📊 Dataset
